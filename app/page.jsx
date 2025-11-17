@@ -1,10 +1,8 @@
 // app/page.jsx
 
-// 1. Add this at the VERY top
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-
 import Header from './components/Header.jsx';
 import Hero from './components/Hero.jsx';
 import About from './components/About.jsx';
@@ -15,11 +13,9 @@ import Pokedex from './components/Pokedex.jsx';
 import Footer from './components/Footer.jsx';
 import BackToTopButton from './components/BackToTopButton.jsx';
 
-// Remove the import for App.css, as we are not using it
-// import './App.css' 
-
 const THEME_KEY = 'site-theme';
 function getPreferredTheme() {
+  // This function will now only be called on the client
   const stored = localStorage.getItem(THEME_KEY);
   if (stored) return stored;
   return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches 
@@ -27,19 +23,31 @@ function getPreferredTheme() {
     : 'dark';
 }
 
-function App() {
-  const [theme, setTheme] = useState(getPreferredTheme);
+export default function Home() {
+  // 1. Initialize theme state to null
+  const [theme, setTheme] = useState(null); 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Apply theme to body and save to localStorage
+  // 2. NEW: Add a useEffect to set the initial theme only on the client
   useEffect(() => {
+    // This runs once after the component mounts in the browser
+    setTheme(getPreferredTheme());
+  }, []); // The empty array [] ensures this runs only on mount
+
+  // 3. UPDATE: Modify your existing useEffect to handle the 'null' state
+  useEffect(() => {
+    // Don't do anything until the theme has been set by the effect above
+    if (theme === null) {
+      return;
+    }
+    
     if (theme === 'light') {
       document.body.classList.add('light');
     } else {
       document.body.classList.remove('light');
     }
     localStorage.setItem(THEME_KEY, theme);
-  }, [theme]);
+  }, [theme]); // This hook now runs when 'theme' changes (from null -> 'dark' or 'light')
 
   // Memoize the toggle function to safely use in the keydown listener
   const toggleTheme = useCallback(() => {
@@ -58,7 +66,7 @@ function App() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [toggleTheme]);
 
-  // Smooth scrolling for anchor links
+  // Smooth scrolling for anchor links (this is fine)
   useEffect(() => {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function(e) {
@@ -71,6 +79,12 @@ function App() {
       });
     });
   }, []);
+
+  // Show a blank page or loading state until the theme is loaded
+  // This prevents a "flash of unstyled content" or theme mismatch
+  if (theme === null) {
+    return null; // Or a <LoadingSpinner /> component
+  }
 
   return (
     <div className="page" id="page">
@@ -93,5 +107,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
