@@ -1,13 +1,29 @@
+// app/components/Pokedex.tsx
+
 import { useState } from 'react';
+import type { FormEvent, ChangeEvent } from 'react';
+
+interface Pokemon {
+  id: number;
+  name: string;
+  sprites: {
+    other: {
+      'showdown': { front_default: string | null };
+      'official-artwork': { front_default: string | null };
+    };
+  };
+  cries: {
+    latest: string | null;
+  };
+}
 
 function Pokedex() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [pokemon, setPokemon] = useState(null);
-  const [error, setError] = useState(null);
+  const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Core function to fetch Pokémon data
-  const fetchPokemon = async (identifier) => {
+  const fetchPokemon = async (identifier: string | number) => {
     setLoading(true);
     setError(null);
     setPokemon(null);
@@ -16,15 +32,19 @@ function Pokedex() {
       if (!response.ok) {
         throw new Error('Pokémon not found!');
       }
-      const data = await response.json();
+      const data: Pokemon = await response.json();
       setPokemon(data);
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
     setLoading(false);
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (searchTerm) {
       fetchPokemon(searchTerm.toLowerCase().trim());
@@ -43,11 +63,9 @@ function Pokedex() {
     }
   };
 
-  // Helper to format name
-  const formatName = (name) => name.charAt(0).toUpperCase() + name.slice(1);
+  const formatName = (name: string) => name.charAt(0).toUpperCase() + name.slice(1);
   
-  // Helper to get sprite
-  const getSprite = (data) => {
+  const getSprite = (data: Pokemon) => {
     return data.sprites.other['showdown'].front_default || 
            data.sprites.other['official-artwork'].front_default;
   };
@@ -62,7 +80,7 @@ function Pokedex() {
           id="pokemonNameInput"
           placeholder="Enter a Pokémon name..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
           required
         />
         <button type="submit" className="btn primary" disabled={loading}>
@@ -71,22 +89,18 @@ function Pokedex() {
       </form>
 
       <div id="pokemonResult" className="pokemon-result-container">
-        {/* Helper Text */}
         {!pokemon && !error && !loading && (
           <p id="pokemonHelperText">Search for a Pokémon to see its sprite here.</p>
         )}
 
-        {/* Error Message */}
         {error && (
           <p id="pokemonErrorText" className="error-message">
             {error}
           </p>
         )}
 
-        {/* Loading Spinner (optional) */}
         {loading && <p>Loading...</p>}
 
-        {/* Pokemon Display */}
         {pokemon && (
           <div id="pokemonDisplay">
             <h3 id="pokemonNameEl">{formatName(pokemon.name)}</h3>
@@ -103,7 +117,7 @@ function Pokedex() {
               <img
                 id="pokemonSpriteEl"
                 className="pokemon-sprite"
-                src={getSprite(pokemon)}
+                src={getSprite(pokemon) || ''}
                 alt={`Image of ${formatName(pokemon.name)}`}
               />
               <button

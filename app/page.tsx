@@ -1,21 +1,20 @@
-// app/page.jsx
+// app/page.tsx
 
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import Header from './components/Header.jsx';
-import Hero from './components/Hero.jsx';
-import About from './components/About.jsx';
-import Skills from './components/Skills.jsx';
-import Projects from './components/Projects.jsx';
-import Contact from './components/Contact.jsx';
-import Pokedex from './components/Pokedex.jsx';
-import Footer from './components/Footer.jsx';
-import BackToTopButton from './components/BackToTopButton.jsx';
+import Header from './components/Header';
+import Hero from './components/Hero';
+import About from './components/About';
+import Skills from './components/Skills';
+import Projects from './components/Projects';
+import Contact from './components/Contact';
+import Pokedex from './components/Pokedex';
+import Footer from './components/Footer';
+import BackToTopButton from './components/BackToTopButton';
 
 const THEME_KEY = 'site-theme';
 function getPreferredTheme() {
-  // This function will now only be called on the client
   const stored = localStorage.getItem(THEME_KEY);
   if (stored) return stored;
   return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches 
@@ -24,19 +23,14 @@ function getPreferredTheme() {
 }
 
 export default function Home() {
-  // 1. Initialize theme state to null
-  const [theme, setTheme] = useState(null); 
+  const [theme, setTheme] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // 2. NEW: Add a useEffect to set the initial theme only on the client
   useEffect(() => {
-    // This runs once after the component mounts in the browser
     setTheme(getPreferredTheme());
-  }, []); // The empty array [] ensures this runs only on mount
+  }, []); 
 
-  // 3. UPDATE: Modify your existing useEffect to handle the 'null' state
   useEffect(() => {
-    // Don't do anything until the theme has been set by the effect above
     if (theme === null) {
       return;
     }
@@ -47,16 +41,14 @@ export default function Home() {
       document.body.classList.remove('light');
     }
     localStorage.setItem(THEME_KEY, theme);
-  }, [theme]); // This hook now runs when 'theme' changes (from null -> 'dark' or 'light')
+  }, [theme]);
 
-  // Memoize the toggle function to safely use in the keydown listener
   const toggleTheme = useCallback(() => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   }, []);
 
-  // Keyboard shortcut (Ctrl+T) for theme
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.key === 't' || e.key === 'T') && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         toggleTheme();
@@ -66,24 +58,28 @@ export default function Home() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [toggleTheme]);
 
-  // Smooth scrolling for anchor links (this is fine)
-  useEffect(() => {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        const href = this.getAttribute('href');
-        if (href.length === 1) return; // skip `#`
+useEffect(() => {
+    // We need to tell TypeScript what 'anchor' is
+    document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach(anchor => {
+      
+      // Use an arrow function here
+      anchor.addEventListener('click', (e) => {
+        
+        // Use 'anchor' instead of 'this'
+        const href = anchor.getAttribute('href');
+        
+        if (!href || href.length === 1) return; // skip `#`
         const target = document.querySelector(href);
         if (!target) return;
+        
         e.preventDefault();
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
   }, []);
 
-  // Show a blank page or loading state until the theme is loaded
-  // This prevents a "flash of unstyled content" or theme mismatch
   if (theme === null) {
-    return null; // Or a <LoadingSpinner /> component
+    return null; // Or some loading component
   }
 
   return (

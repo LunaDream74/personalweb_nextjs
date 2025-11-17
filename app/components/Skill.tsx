@@ -1,11 +1,19 @@
-function Skill({ label, level, isRevealed }) {
+// app/components/Skill.tsx
+
+interface SkillProps {
+  label: string;
+  level: string;
+  isRevealed: boolean;
+}
+
+function Skill({ label, level, isRevealed }: SkillProps) {
   
   const barStyle = {
     width: isRevealed ? `${level}%` : '0%',
   };
 
   return (
-    <div className="skill" data-level={level} tabIndex="0">
+    <div className="skill" data-level={level} tabIndex={0}>
       <div className="skill-head">
         <span>{label}</span>
         <span className="skill-percent">{level}%</span>

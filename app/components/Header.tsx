@@ -1,4 +1,13 @@
-function Header({ theme, onToggleTheme, isMenuOpen, onToggleMenu }) {
+// app/components/Header.tsx
+
+interface HeaderProps {
+  theme: string | null;
+  onToggleTheme: () => void;
+  isMenuOpen: boolean;
+  onToggleMenu: () => void;
+}
+
+function Header({ theme, onToggleTheme, isMenuOpen, onToggleMenu }: HeaderProps) {
   const themeIconClass = theme === 'light' ? 'bi-moon-fill' : 'bi-sun-fill';
 
   return (
@@ -41,7 +50,7 @@ function Header({ theme, onToggleTheme, isMenuOpen, onToggleMenu }) {
         id="mobileMenu" 
         className="mobile-menu" 
         aria-hidden={!isMenuOpen}
-        style={{ display: isMenuOpen ? 'flex' : 'none' }} // Simple inline style toggle
+        style={{ display: isMenuOpen ? 'flex' : 'none' }}
       >
         <a href="#about">About</a>
         <a href="#skills">Skills</a>

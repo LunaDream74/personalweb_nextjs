@@ -1,29 +1,26 @@
+// app/components/Contact.tsx
+
 import { useState } from 'react';
+import type { FormEvent, ChangeEvent } from 'react';
 
 function Contact() {
-  // 1. Set up state to "control" the form inputs
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
-  // 2. Handle the form submission
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Stop the form from reloading the page
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    // Basic validation (same as your script.js)
     if (!email.trim() || !message.trim()) {
       alert('Please provide your email and a short message.');
       return;
     }
 
-    // Compose mailto (same as your script.js)
     const subject = encodeURIComponent('Portfolio contact from ' + email);
     const body = encodeURIComponent(message + '\n\n---\nContact: ' + email);
     const recipient = '22130103@student.hcmus.edu.vn';
     
-    // Trigger the user's default mail client
     window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
 
-    // Optional: Clear the form after sending
     setEmail('');
     setMessage('');
   };
@@ -36,7 +33,6 @@ function Contact() {
         <div className="contact-card">
           <p>If you'd like to collaborate, hire me, or just say hi — drop a message.</p>
 
-          {/* 3. Connect the form and inputs to React state */}
           <form id="contactForm" className="contact-form" noValidate onSubmit={handleSubmit}>
             <label>
               <span className="label-text">Your email</span>
@@ -46,8 +42,8 @@ function Contact() {
                 name="email"
                 placeholder="you@example.com"
                 required
-                value={email} // Bind value to state
-                onChange={(e) => setEmail(e.target.value)} // Update state on change
+                value={email}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               />
             </label>
 
@@ -56,11 +52,11 @@ function Contact() {
               <textarea
                 id="message"
                 name="message"
-                rows="4"
+                rows={4}
                 placeholder="Hi — I'd like to talk about..."
                 required
-                value={message} // Bind value to state
-                onChange={(e) => setMessage(e.target.value)} // Update state on change
+                value={message}
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
               ></textarea>
             </label>
 

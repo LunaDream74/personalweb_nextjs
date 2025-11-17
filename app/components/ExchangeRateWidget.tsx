@@ -1,3 +1,5 @@
+// app/components/ExchangeRateWidget.tsx
+
 import { useState, useEffect } from 'react';
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
@@ -8,10 +10,21 @@ function ExchangeRateWidget() {
 
   useEffect(() => {
     const fetchRate = async () => {
-      const requestOptions = {
+      
+      // 1. Add this check for the API key
+      if (!API_KEY) {
+        console.error("Exchange Rate Error: NEXT_PUBLIC_API_KEY is not defined.");
+        setRate("N/A");
+        return; // Stop the function
+      }
+
+      // 2. Add the 'RequestInit' type to requestOptions
+      const requestOptions: RequestInit = {
         method: 'GET',
-        redirect: 'follow',
-        headers: { 'apikey': API_KEY }
+        redirect: 'follow', // This is now correctly typed
+        headers: { 
+          'apikey': API_KEY // This is now safe because we checked for API_KEY
+        }
       };
 
       try {
@@ -33,9 +46,9 @@ function ExchangeRateWidget() {
     };
 
     fetchRate();
-    const intervalId = setInterval(fetchRate, 300000);
+    const intervalId = setInterval(fetchRate, 300000); // 5 minutes
     return () => clearInterval(intervalId);
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
   return (
     <div className="info-row exchange-rate-widget">
